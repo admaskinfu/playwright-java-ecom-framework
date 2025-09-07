@@ -152,6 +152,7 @@ public class HomePage {
                 } else {
                     break; // Stop when we hit the next row
                 }ctually 
+                
             }
             
             return columns;
