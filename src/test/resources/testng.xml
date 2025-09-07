@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<!-- TestNG Suite Configuration for UAT Tests -->
+<!-- This file defines how our UAT tests will be executed -->
+<suite name="E-commerce UAT Test Suite" verbose="1">
+    
+    <!-- Test for Homepage Product Verification -->
+    <test name="Homepage Product Tests" preserve-order="true">
+        <classes>
+            <class name="com.ecom.automation.testrunners.HomepageTestRunner"/>
+        </classes>
+    </test>
+    
+    <!-- Additional test suites can be added here -->
+    <!-- Example: Shopping Cart Tests, User Registration Tests, etc. -->
+    
+</suite>

@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <!-- Maven Project Configuration -->
+    <modelVersion>4.0.0</modelVersion>
+    
+    <!-- Project Identification -->
+    <groupId>com.ecom.automation</groupId>
+    <artifactId>playwright-java-ecom-framework</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    
+    <!-- Project Metadata -->
+    <name>Playwright Java E-commerce Test Framework</name>
+    <description>A professional BDD test automation framework for e-commerce testing using Java, Playwright, REST Assured, TestNG, and Cucumber</description>
+    
+    <!-- Java Version Configuration -->
+    <properties>
+        <!-- Maven Compiler Plugin Configuration -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        
+        <!-- Dependency Versions - Centralized for easy management -->
+        <playwright.version>1.40.0</playwright.version>
+        <restassured.version>5.3.2</restassured.version>
+        <cucumber.version>7.14.0</cucumber.version>
+        <testng.version>7.8.0</testng.version>
+        <jackson.version>2.15.2</jackson.version>
+        <slf4j.version>2.0.7</slf4j.version>
+        <logback.version>1.4.11</logback.version>
+        <maven.surefire.version>3.1.2</maven.surefire.version>
+    </properties>
+    
+    <!-- Dependencies Section -->
+    <dependencies>
+        
+        <!-- ===== UAT TESTING FRAMEWORKS ===== -->
+        
+        <!-- TestNG - UAT Test Runner -->
+        <!-- TestNG executes our User Acceptance Tests. It's similar to pytest in Python but
+             provides better support for BDD scenarios and parallel test execution. Perfect for
+             running end-to-end user journeys and business requirement validation. -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- ===== BDD FRAMEWORK ===== -->
+        
+        <!-- Cucumber Java - BDD for UAT Scenarios -->
+        <!-- Cucumber allows us to write UAT tests in Gherkin syntax (Given-When-Then).
+             This makes our user acceptance tests readable by business stakeholders and
+             clearly documents user journeys and business requirements. -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- Cucumber TestNG Integration -->
+        <!-- Integrates Cucumber with TestNG to run our BDD scenarios as UAT tests.
+             This allows us to execute user acceptance tests with proper reporting and
+             parallel execution capabilities. -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-testng</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- Cucumber Dependency Injection -->
+        <!-- Provides dependency injection for our step definitions, making it easier
+             to share data and objects between different test steps in our UAT scenarios. -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-picocontainer</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- ===== UI AUTOMATION ===== -->
+        
+        <!-- Playwright Java - UI Automation for UAT -->
+        <!-- Playwright automates the user interface for our UAT tests. It simulates real
+             user interactions like clicking, typing, and navigating. More reliable than
+             Selenium and perfect for testing user journeys on e-commerce websites. -->
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>${playwright.version}</version>
+        </dependency>
+        
+        <!-- ===== API TESTING ===== -->
+        
+        <!-- REST Assured - API Testing for UAT -->
+        <!-- REST Assured handles API calls within our UAT scenarios. For example, when testing
+             user registration, we might need to verify the API response. It provides a clean
+             way to make HTTP requests and validate responses as part of user acceptance testing. -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${restassured.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- REST Assured JSON Schema Validator -->
+        <!-- Validates API responses in our UAT tests. For example, when a user places an order,
+             we can verify the API response structure matches our expectations. -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${restassured.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- ===== JSON PROCESSING ===== -->
+        
+        <!-- Jackson Core - JSON Processing for UAT -->
+        <!-- Jackson processes JSON data in our UAT tests. For example, when testing API responses
+             or handling test data, we need to parse and work with JSON objects. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        
+        <!-- Jackson Databind - Object Mapping -->
+        <!-- Converts JSON responses to Java objects in our UAT tests. Makes it easy to work with
+             API responses and test data as Java objects instead of raw JSON strings. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        
+        <!-- Jackson Annotations -->
+        <!-- Provides annotations for customizing JSON handling in our UAT test data models. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        
+        <!-- ===== LOGGING ===== -->
+        
+        <!-- SLF4J API - Logging for UAT Tests -->
+        <!-- SLF4J provides logging capabilities for our UAT tests. We can log test steps,
+             user actions, and results to help with debugging and test reporting. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        
+        <!-- Logback Classic - Logging Implementation -->
+        <!-- Logback implements the actual logging functionality. It creates detailed logs
+             of our UAT test execution, making it easier to debug failed tests and
+             understand what happened during test runs. -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        
+        <!-- ===== UTILITY LIBRARIES ===== -->
+        
+        <!-- Apache Commons Lang - Utility Functions for UAT -->
+        <!-- Provides utility functions for our UAT tests. For example, generating test data,
+             string manipulation, and object handling. Makes our test code cleaner and more maintainable. -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.13.0</version>
+        </dependency>
+        
+        <!-- Apache Commons IO - File Operations for UAT -->
+        <!-- Handles file operations in our UAT tests. For example, reading test data from files,
+             saving screenshots, or managing test reports. -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.13.0</version>
+        </dependency>
+        
+    </dependencies>
+    
+    <!-- Build Configuration -->
+    <build>
+        <plugins>
+            
+            <!-- Maven Compiler Plugin -->
+            <!-- Compiles Java source code. The 'source' and 'target' properties define
+                 the Java version compatibility. This is similar to specifying Python version
+                 in setup.py or pyproject.toml. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            
+            <!-- Maven Surefire Plugin - UAT Test Execution -->
+            <!-- Runs UAT tests during the 'test' phase. This executes our BDD scenarios
+                 and end-to-end user acceptance tests. Similar to running 'pytest' in Python. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <!-- TestNG Suite File Configuration -->
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <!-- Parallel Test Execution for faster UAT test runs -->
+                    <parallel>methods</parallel>
+                    <threadCount>2</threadCount>
+                    <!-- Continue running tests even if one fails -->
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <!-- Pass Cucumber filter tags to test execution -->
+                    <systemPropertyVariables>
+                        <cucumber.filter.tags>${cucumber.filter.tags}</cucumber.filter.tags>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            
+            <!-- Cucumber Reporting Plugin -->
+            <!-- Generates beautiful HTML reports for our UAT tests. Shows test results,
+                 step-by-step execution, and screenshots. Perfect for sharing results
+                 with stakeholders and debugging failed tests. -->
+                <!-- Cucumber reporting plugin - disabled for now -->
+                <!--
+                <plugin>
+                    <groupId>net.masterthought</groupId>
+                    <artifactId>maven-cucumber-reporting</artifactId>
+                    <version>5.7.6</version>
+                    <executions>
+                        <execution>
+                            <id>generate</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <configuration>
+                                <projectName>E-commerce UAT Framework</projectName>
+                                <outputDirectory>${project.build.directory}/cucumber-reports</outputDirectory>
+                                <jsonFiles>
+                                    <param>${project.build.directory}/cucumber-reports/cucumber.json</param>
+                                </jsonFiles>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                -->
+            
+        </plugins>
+    </build>
+    
+    <!-- Profiles for Different UAT Test Environments -->
+    <profiles>
+        <!-- Development Environment -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <env>dev</env>
+            </properties>
+        </profile>
+        
+        <!-- Staging Environment -->
+        <profile>
+            <id>staging</id>
+            <properties>
+                <env>staging</env>
+            </properties>
+        </profile>
+        
+        <!-- Production Environment -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <env>prod</env>
+            </properties>
+        </profile>
+        
+        <!-- Tag-based test execution profiles -->
+        <profile>
+            <id>tag</id>
+            <activation>
+                <property>
+                    <name>tag</name>
+                </property>
+            </activation>
+            <properties>
+                <cucumber.filter.tags>@${tag}</cucumber.filter.tags>
+            </properties>
+        </profile>
+        
+        <!-- Complex tag expressions profile -->
+        <profile>
+            <id>tags</id>
+            <activation>
+                <property>
+                    <name>tags</name>
+                </property>
+            </activation>
+            <properties>
+                <cucumber.filter.tags>${tags}</cucumber.filter.tags>
+            </properties>
+        </profile>
+    </profiles>
+    
+</project>
