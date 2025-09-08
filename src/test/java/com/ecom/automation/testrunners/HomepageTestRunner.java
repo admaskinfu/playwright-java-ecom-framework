@@ -15,7 +15,7 @@ import io.cucumber.testng.CucumberOptions;
  * - plugin: what reports to generate
  */
 @CucumberOptions(
-    features = "src/test/resources/features",  // Location of .feature files
+    features = "src/test/resources/features/frontend/homepage.feature",  // Only homepage features
     glue = "com.ecom.automation.stepdefinitions",  // Package with step definitions
     plugin = {
         "pretty",  // Pretty console output

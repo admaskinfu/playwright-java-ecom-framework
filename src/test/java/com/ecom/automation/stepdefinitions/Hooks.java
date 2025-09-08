@@ -74,19 +74,57 @@ public class Hooks {
         logger.info("=== Setting up test environment ===");
         
         try {
-            // Initialize browser and page objects
-            testContext.initializeBrowser();
+            // Check if this is an API test by looking at the stack trace
+            boolean isApiTest = isApiTest();
             
-            logger.info("Test environment ready:");
-            logger.info("- Environment: {}", testContext.getConfig().getBaseUrl());
-            logger.info("- Browser: {}", testContext.getConfig().getBrowser());
-            logger.info("- Headless: {}", testContext.getConfig().isHeadless());
-            logger.info("- Timeout: {}ms", testContext.getConfig().getTimeout());
+            if (isApiTest) {
+                logger.info("API test detected - skipping browser initialization");
+                logger.info("API test environment ready");
+                logger.info("- Ready for API testing");
+                logger.info("- No browser initialization needed");
+            } else {
+                // Initialize browser and page objects for UI tests
+                testContext.initializeBrowser();
+                
+                logger.info("UI test environment ready:");
+                logger.info("- Environment: {}", testContext.getConfig().getBaseUrl());
+                logger.info("- Browser: {}", testContext.getConfig().getBrowser());
+                logger.info("- Headless: {}", testContext.getConfig().isHeadless());
+                logger.info("- Timeout: {}ms", testContext.getConfig().getTimeout());
+            }
             
         } catch (Exception e) {
             logger.error("Failed to set up test environment: {}", e.getMessage(), e);
             throw new RuntimeException("Test setup failed", e);
         }
+    }
+    
+    /**
+     * Check if this is an API test by examining the current test context
+     * 
+     * This uses a more reliable approach by checking the test context
+     * and system properties to determine if we're running API tests.
+     */
+    private boolean isApiTest() {
+        // Check if we're running the ApiTestRunner specifically
+        String testClass = System.getProperty("test");
+        if (testClass != null && testClass.contains("ApiTestRunner")) {
+            return true;
+        }
+        
+        // Check if we're in an API test context by looking at the current thread
+        String threadName = Thread.currentThread().getName();
+        if (threadName.contains("ApiTestRunner") || threadName.contains("Api")) {
+            return true;
+        }
+        
+        // Check system properties for API test indicators
+        String cucumberTags = System.getProperty("cucumber.filter.tags");
+        if (cucumberTags != null && cucumberTags.contains("@api")) {
+            return true;
+        }
+        
+        return false;
     }
     
     /**
@@ -113,9 +151,17 @@ public class Hooks {
         logger.info("=== Cleaning up test environment ===");
         
         try {
-            // Clean up browser resources
-            testContext.cleanup();
-            logger.info("Test environment cleaned up successfully");
+            // Check if this is an API test
+            boolean isApiTest = isApiTest();
+            
+            if (isApiTest) {
+                logger.info("API test detected - skipping browser cleanup");
+                logger.info("API test environment cleaned up successfully");
+            } else {
+                // Clean up browser resources for UI tests
+                testContext.cleanup();
+                logger.info("UI test environment cleaned up successfully");
+            }
             
         } catch (Exception e) {
             logger.error("Error during cleanup: {}", e.getMessage(), e);
