@@ -61,8 +61,8 @@ jobs:
         run: |
           mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@frontend" -Denv=${{ github.event.inputs.environment }}
         env:
-          WC_CONSUMER_KEY: ${{ secrets.WC_CONSUMER_KEY }}
-          WC_CONSUMER_SECRET: ${{ secrets.WC_CONSUMER_SECRET }}
+          API_CONSUMER_KEY: ${{ secrets.API_CONSUMER_KEY }}
+          API_CONSUMER_SECRET: ${{ secrets.API_CONSUMER_SECRET }}
           
       - name: Upload frontend test results
         uses: actions/upload-artifact@v4
@@ -102,8 +102,8 @@ jobs:
         run: |
           mvn test -Dtest=SimpleCustomerApiTest -Denv=${{ github.event.inputs.environment }}
         env:
-          WC_CONSUMER_KEY: ${{ secrets.WC_CONSUMER_KEY }}
-          WC_CONSUMER_SECRET: ${{ secrets.WC_CONSUMER_SECRET }}
+          API_CONSUMER_KEY: ${{ secrets.API_CONSUMER_KEY }}
+          API_CONSUMER_SECRET: ${{ secrets.API_CONSUMER_SECRET }}
           
       - name: Upload backend test results
         uses: actions/upload-artifact@v4
