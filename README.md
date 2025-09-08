@@ -443,7 +443,7 @@ graph TB
 > - Cucumber HTML reports
 > - Multi-browser test execution results
 > - Security scan reports
-> - Performance metrics dashboards
+> - Prformance metrics dashboards
 
 #### **Report Examples**
 - **TestNG Report**: Comprehensive test execution summary with pass/fail statistics
