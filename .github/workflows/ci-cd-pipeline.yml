@@ -287,8 +287,8 @@ jobs:
       - name: Run backend smoke tests
         env:
           ENVIRONMENT: dev
-          WC_CONSUMER_KEY: ${{ secrets.WC_CONSUMER_KEY }}
-          WC_CONSUMER_SECRET: ${{ secrets.WC_CONSUMER_SECRET }}
+          API_CONSUMER_KEY: ${{ secrets.API_CONSUMER_KEY }}
+          API_CONSUMER_SECRET: ${{ secrets.API_CONSUMER_SECRET }}
         run: |
           mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@smoke and @api" -Denv=dev
           
@@ -446,8 +446,8 @@ jobs:
       - name: Run backend regression tests
         env:
           ENVIRONMENT: staging
-          WC_CONSUMER_KEY: ${{ secrets.WC_CONSUMER_KEY }}
-          WC_CONSUMER_SECRET: ${{ secrets.WC_CONSUMER_SECRET }}
+          API_CONSUMER_KEY: ${{ secrets.API_CONSUMER_KEY }}
+          API_CONSUMER_SECRET: ${{ secrets.API_CONSUMER_SECRET }}
         run: |
           mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@regression and @api" -Denv=staging
           
