@@ -1,18 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<!-- TestNG Suite Configuration for UAT Tests -->
+<!-- ================================================================= -->
+<!-- E-commerce Test Automation Framework - TestNG Suite Configuration -->
+<!-- ================================================================= -->
 <!-- This file defines how our UAT tests will be executed -->
-<suite name="E-commerce UAT Test Suite" verbose="1">
+<!-- 
+     Test Organization:
+     - Frontend Tests: UI automation using Playwright + Cucumber
+     - API Tests: Backend API testing using OAuth 1.0a + TestNG
+-->
+
+<suite name="E-commerce Test Suite" verbose="1">
     
-    <!-- Test for Homepage Product Verification -->
-    <test name="Homepage Product Tests" preserve-order="true">
+    <!-- ================================================================= -->
+    <!-- FRONTEND TESTS (UI Automation) -->
+    <!-- ================================================================= -->
+    <!-- UI tests using Playwright + Cucumber for BDD scenarios -->
+    <test name="Frontend Tests" preserve-order="true">
         <classes>
             <class name="com.ecom.automation.testrunners.HomepageTestRunner"/>
         </classes>
     </test>
     
-    <!-- Additional test suites can be added here -->
-    <!-- Example: Shopping Cart Tests, User Registration Tests, etc. -->
+    <!-- ================================================================= -->
+    <!-- API TESTS (Backend Testing) -->
+    <!-- ================================================================= -->
+    <!-- API tests using OAuth 1.0a authentication + TestNG -->
+    <test name="API Tests" preserve-order="true">
+        <classes>
+            <class name="com.ecom.automation.api.SimpleCustomerApiTest"/>
+        </classes>
+    </test>
+    
+    <!-- ================================================================= -->
+    <!-- FUTURE TEST SUITES -->
+    <!-- ================================================================= -->
+    <!-- Additional test suites can be added here as the framework grows -->
+    <!-- Examples: -->
+    <!-- - Shopping Cart Tests -->
+    <!-- - User Registration Tests -->
+    <!-- - Payment Processing Tests -->
+    <!-- - Order Management Tests -->
     
 </suite>

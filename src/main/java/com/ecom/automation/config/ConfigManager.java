@@ -120,4 +120,49 @@ public class ConfigManager {
     public int getTimeout() {
         return Integer.parseInt(getProperty("timeout", "30000"));
     }
+    
+    /**
+     * Get the API base URL from configuration
+     * 
+     * @return API base URL
+     */
+    public String getApiBaseUrl() {
+        return getProperty("api.base.url", "http://demostore.supersqa.com/wp-json/wc/v3");
+    }
+    
+    /**
+     * Get the API consumer key from configuration
+     * This method handles environment variable substitution for security
+     * 
+     * @return API consumer key
+     */
+    public String getApiConsumerKey() {
+        String key = getProperty("api.consumer.key", "your_consumer_key_here");
+        // Replace environment variable placeholders
+        if (key.startsWith("${") && key.contains(":")) {
+            String envVar = key.substring(2, key.indexOf(":"));
+            String defaultValue = key.substring(key.indexOf(":") + 1, key.length() - 1);
+            String envValue = System.getenv(envVar);
+            return envValue != null ? envValue : defaultValue;
+        }
+        return key;
+    }
+    
+    /**
+     * Get the API consumer secret from configuration
+     * This method handles environment variable substitution for security
+     * 
+     * @return API consumer secret
+     */
+    public String getApiConsumerSecret() {
+        String secret = getProperty("api.consumer.secret", "your_consumer_secret_here");
+        // Replace environment variable placeholders
+        if (secret.startsWith("${") && secret.contains(":")) {
+            String envVar = secret.substring(2, secret.indexOf(":"));
+            String defaultValue = secret.substring(secret.indexOf(":") + 1, secret.length() - 1);
+            String envValue = System.getenv(envVar);
+            return envValue != null ? envValue : defaultValue;
+        }
+        return secret;
+    }
 }
