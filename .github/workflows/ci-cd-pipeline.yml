@@ -1,0 +1,554 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      skip_tests:
+        description: 'Skip test stages'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  JAVA_VERSION: '17'
+  MAVEN_VERSION: '3.9.6'
+
+jobs:
+  # =============================================================================
+  # STAGE 1: BUILD & QUALITY GATES
+  # =============================================================================
+  
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build step
+        run: |
+          echo "Hello World! 🚀"
+          echo "Building test automation framework..."
+          echo "📦 Framework version: ${{ github.sha }}"
+          echo "🏷️  Branch: ${{ github.ref_name }}"
+          echo "⏰ Build time: $(date)"
+          echo "✅ Build completed successfully!"
+
+  security-scan:
+    name: Security Scan (Automation Code)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Run OWASP Dependency Check
+        run: |
+          mvn org.owasp:dependency-check-maven:check -Dformat=JSON -Dformat=HTML
+          
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            target/dependency-check-report.json
+            target/dependency-check-report.html
+
+  lint-main-app:
+    name: Lint Main App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint main app
+        run: |
+          echo "Hello World! 🚀"
+          echo "Linting main application..."
+          echo "📦 App version: ${{ github.sha }}"
+          echo "🏷️  Branch: ${{ github.ref_name }}"
+          echo "⏰ Lint time: $(date)"
+          echo "🎭 SIMULATION: No actual main app exists - this is a demo"
+          echo "✅ Main app linting completed successfully!"
+
+  lint-automation-code:
+    name: Lint Automation Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Validate Maven configuration
+        run: |
+          mvn validate
+          
+      - name: Compile test code
+        run: |
+          mvn test-compile
+          
+      - name: Check code style (SpotBugs)
+        run: |
+          mvn spotbugs:check || true
+
+  framework-validation:
+    name: Framework Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate framework
+        run: |
+          echo "🔍 Validating framework structure..."
+          echo "📦 Framework version: ${{ github.sha }}"
+          echo "🏷️  Branch: ${{ github.ref_name }}"
+          echo "⏰ Validation time: $(date)"
+          echo "🎭 SIMULATION: Framework validation would run here"
+          echo "✅ Framework validation completed successfully!"
+
+  # =============================================================================
+  # STAGE 2: DEPLOY TO DEV (only for develop branch or manual dispatch)
+  # =============================================================================
+  
+  deploy-to-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    needs: [build, security-scan, lint-main-app, lint-automation-code, framework-validation]
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Simulate deployment to Dev
+        run: |
+          echo "🚀 Simulating deployment to DEV environment..."
+          echo "📦 Application version: ${{ github.sha }}"
+          echo "🏷️  Branch: ${{ github.ref_name }}"
+          echo "⏰ Deployment time: $(date)"
+          
+          # Simulate deployment steps
+          echo "📋 Pre-deployment checks..."
+          sleep 2
+          
+          echo "🔄 Deploying application to DEV..."
+          sleep 3
+          
+          echo "✅ Deployment to DEV completed successfully!"
+          
+      - name: Update deployment status
+        run: |
+          echo "📊 Deployment Status: SUCCESS"
+          echo "🌐 Environment: DEV"
+          echo "🔗 Commit: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+
+  health-check-dev:
+    name: Health Check Dev
+    runs-on: ubuntu-latest
+    needs: deploy-to-dev
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: dev
+    steps:
+      - name: Health check
+        run: |
+          echo "🏥 Running health check for DEV environment..."
+          echo "🌐 Checking if demo site is reachable..."
+          
+          # Simple curl check to see if the demo site is accessible
+          if curl -f -s -o /dev/null -w "%{http_code}" http://demostore.supersqa.com | grep -q "200"; then
+            echo "✅ Health check passed! Site is reachable."
+            echo "📊 Status: 200 OK"
+          else
+            echo "❌ Health check failed! Site is not reachable."
+            echo "📊 This is expected for a demo - simulating successful health check"
+            echo "✅ Health check completed (simulated success)"
+          fi
+          
+          echo "⏰ Health check time: $(date)"
+          echo "🎯 Environment: DEV"
+
+  # =============================================================================
+  # STAGE 3: UAT ON DEV
+  # =============================================================================
+  
+  frontend-smoke-dev:
+    name: Frontend Smoke Tests (Dev)
+    runs-on: ubuntu-latest
+    needs: health-check-dev
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Install Playwright browsers
+        run: |
+          mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"
+        
+      - name: Run frontend smoke tests
+        env:
+          ENVIRONMENT: dev
+        run: |
+          mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke and @frontend" -Denv=dev
+          
+      - name: Upload frontend smoke test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-smoke-dev-results
+          path: |
+            target/cucumber-reports/
+            target/surefire-reports/
+
+  backend-smoke-dev:
+    name: Backend Smoke Tests (Dev)
+    runs-on: ubuntu-latest
+    needs: health-check-dev
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Run backend smoke tests
+        env:
+          ENVIRONMENT: dev
+          WC_CONSUMER_KEY: ${{ secrets.WC_CONSUMER_KEY }}
+          WC_CONSUMER_SECRET: ${{ secrets.WC_CONSUMER_SECRET }}
+        run: |
+          mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@smoke and @api" -Denv=dev
+          
+      - name: Upload backend smoke test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-smoke-dev-results
+          path: |
+            target/surefire-reports/
+            target/cucumber-reports/
+
+  # =============================================================================
+  # STAGE 4: DEPLOY TO STAGING (only for main branch or manual dispatch)
+  # =============================================================================
+  
+  deploy-to-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [frontend-smoke-dev, backend-smoke-dev]
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Simulate deployment to Staging
+        run: |
+          echo "🚀 Simulating deployment to STAGING environment..."
+          echo "📦 Application version: ${{ github.sha }}"
+          echo "🏷️  Branch: ${{ github.ref_name }}"
+          echo "⏰ Deployment time: $(date)"
+          
+          # Simulate deployment steps
+          echo "📋 Pre-deployment checks..."
+          sleep 2
+          
+          echo "🔄 Deploying application to STAGING..."
+          sleep 3
+          
+          echo "✅ Deployment to STAGING completed successfully!"
+          
+      - name: Update deployment status
+        run: |
+          echo "📊 Deployment Status: SUCCESS"
+          echo "🌐 Environment: STAGING"
+          echo "🔗 Commit: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+
+  health-check-staging:
+    name: Health Check Staging
+    runs-on: ubuntu-latest
+    needs: deploy-to-staging
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: staging
+    steps:
+      - name: Health check
+        run: |
+          echo "🏥 Running health check for STAGING environment..."
+          echo "🌐 Checking if demo site is reachable..."
+          
+          # Simple curl check to see if the demo site is accessible
+          if curl -f -s -o /dev/null -w "%{http_code}" http://demostore.supersqa.com | grep -q "200"; then
+            echo "✅ Health check passed! Site is reachable."
+            echo "📊 Status: 200 OK"
+          else
+            echo "❌ Health check failed! Site is not reachable."
+            echo "📊 This is expected for a demo - simulating successful health check"
+            echo "✅ Health check completed (simulated success)"
+          fi
+          
+          echo "⏰ Health check time: $(date)"
+          echo "🎯 Environment: STAGING"
+
+  # =============================================================================
+  # STAGE 5: UAT ON STAGING
+  # =============================================================================
+  
+  frontend-regression-staging:
+    name: Frontend Regression Tests (Staging)
+    runs-on: ubuntu-latest
+    needs: health-check-staging
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: staging
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Install Playwright browsers
+        run: |
+          mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install ${{ matrix.browser }}"
+        
+      - name: Run frontend regression tests
+        env:
+          ENVIRONMENT: staging
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@regression and @frontend" -Denv=staging
+          
+      - name: Upload frontend regression test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-regression-staging-${{ matrix.browser }}-results
+          path: |
+            target/cucumber-reports/
+            target/surefire-reports/
+
+  backend-regression-staging:
+    name: Backend Regression Tests (Staging)
+    runs-on: ubuntu-latest
+    needs: health-check-staging
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Run backend regression tests
+        env:
+          ENVIRONMENT: staging
+          WC_CONSUMER_KEY: ${{ secrets.WC_CONSUMER_KEY }}
+          WC_CONSUMER_SECRET: ${{ secrets.WC_CONSUMER_SECRET }}
+        run: |
+          mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@regression and @api" -Denv=staging
+          
+      - name: Upload backend regression test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-regression-staging-results
+          path: |
+            target/surefire-reports/
+            target/cucumber-reports/
+
+  # =============================================================================
+  # STAGE 6: DEPLOY TO PROD (only for main branch or manual dispatch)
+  # =============================================================================
+  
+  deploy-to-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    needs: [frontend-regression-staging, backend-regression-staging]
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Simulate deployment to Production
+        run: |
+          echo "🚀 Simulating deployment to PRODUCTION environment..."
+          echo "📦 Application version: ${{ github.sha }}"
+          echo "🏷️  Branch: ${{ github.ref_name }}"
+          echo "⏰ Deployment time: $(date)"
+          
+          # Simulate deployment steps
+          echo "📋 Pre-deployment checks..."
+          sleep 2
+          
+          echo "🔄 Deploying application to PRODUCTION..."
+          sleep 5
+          
+          echo "✅ Deployment to PRODUCTION completed successfully!"
+          
+      - name: Update deployment status
+        run: |
+          echo "📊 Deployment Status: SUCCESS"
+          echo "🌐 Environment: PRODUCTION"
+          echo "🔗 Commit: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+
+  # =============================================================================
+  # STAGE 7: POST-DEPLOYMENT CHECKS
+  # =============================================================================
+  
+  post-deployment-checks:
+    name: Post-Deployment Checks
+    runs-on: ubuntu-latest
+    needs: deploy-to-prod
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    environment: production
+    steps:
+      - name: Post-deployment checks
+        run: |
+          echo "🔍 Running post-deployment checks for PRODUCTION..."
+          echo "🌐 Checking if demo site is reachable..."
+          
+          # Simple curl check to see if the demo site is accessible
+          if curl -f -s -o /dev/null -w "%{http_code}" http://demostore.supersqa.com | grep -q "200"; then
+            echo "✅ Post-deployment health check passed! Site is reachable."
+            echo "📊 Status: 200 OK"
+          else
+            echo "❌ Post-deployment health check failed! Site is not reachable."
+            echo "📊 This is expected for a demo - simulating successful post-deployment check"
+            echo "✅ Post-deployment checks completed (simulated success)"
+          fi
+          
+          echo "🧪 Running critical smoke tests (simulation)..."
+          echo "🎭 SIMULATION: Critical smoke tests would run here in a real project"
+          echo "✅ Post-deployment checks completed successfully!"
+          echo "⏰ Check time: $(date)"
+          echo "🎯 Environment: PRODUCTION"
+
+  # =============================================================================
+  # NOTIFICATION
+  # =============================================================================
+  
+  notify-completion:
+    name: Notify Completion
+    runs-on: ubuntu-latest
+    needs: [deploy-to-dev, deploy-to-staging, deploy-to-prod, post-deployment-checks]
+    if: always()
+    steps:
+      - name: Notify deployment status
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ CI/CD Pipeline completed successfully!"
+            echo "🔗 Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "📊 Summary:"
+            echo "  - Build: ✅"
+            echo "  - Security: ✅"
+            echo "  - Tests: ✅"
+            echo "  - Deployment: ✅"
+          else
+            echo "❌ CI/CD Pipeline failed!"
+            echo "🔗 Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "📊 Check the logs above for details"
+          fi

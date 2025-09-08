@@ -1,0 +1,114 @@
+name: Run Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      test-type:
+        description: 'Type of tests to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - frontend
+          - backend
+      environment:
+        description: 'Environment to test against'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+env:
+  JAVA_VERSION: '17'
+  MAVEN_VERSION: '3.9.6'
+
+jobs:
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test-type == 'all' || github.event.inputs.test-type == 'frontend' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Install Playwright browsers
+        run: |
+          mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"
+          
+      - name: Run frontend tests
+        run: |
+          mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@frontend" -Denv=${{ github.event.inputs.environment }}
+        env:
+          WC_CONSUMER_KEY: ${{ secrets.WC_CONSUMER_KEY }}
+          WC_CONSUMER_SECRET: ${{ secrets.WC_CONSUMER_SECRET }}
+          
+      - name: Upload frontend test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-results
+          path: |
+            target/cucumber-reports/
+            target/surefire-reports/
+
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test-type == 'all' || github.event.inputs.test-type == 'backend' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Run backend tests
+        run: |
+          mvn test -Dtest=SimpleCustomerApiTest -Denv=${{ github.event.inputs.environment }}
+        env:
+          WC_CONSUMER_KEY: ${{ secrets.WC_CONSUMER_KEY }}
+          WC_CONSUMER_SECRET: ${{ secrets.WC_CONSUMER_SECRET }}
+          
+      - name: Upload backend test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: |
+            target/surefire-reports/
+            target/cucumber-reports/
