@@ -2,8 +2,12 @@ package com.ecom.automation.stepdefinitions;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
+import com.microsoft.playwright.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.file.Path;
 
 /**
  * Hooks - Centralized test lifecycle management
@@ -147,7 +151,7 @@ public class Hooks {
      * }
      */
     @After
-    public void tearDown() {
+    public void tearDown(Scenario scenario) {
         logger.info("=== Cleaning up test environment ===");
         
         try {
@@ -155,9 +159,14 @@ public class Hooks {
             boolean isApiTest = isApiTest();
             
             if (isApiTest) {
-                logger.info("API test detected - skipping browser cleanup");
+                logger.info("API test detected - skipping browser cleanup and screenshot capture");
                 logger.info("API test environment cleaned up successfully");
             } else {
+                // Capture screenshot on test failure for UI tests
+                if (scenario.isFailed()) {
+                    captureScreenshotOnFailure(scenario);
+                }
+                
                 // Clean up browser resources for UI tests
                 testContext.cleanup();
                 logger.info("UI test environment cleaned up successfully");
@@ -166,5 +175,81 @@ public class Hooks {
         } catch (Exception e) {
             logger.error("Error during cleanup: {}", e.getMessage(), e);
         }
+    }
+    
+    /**
+     * Capture screenshot when test fails using Playwright's built-in methods
+     * 
+     * This method uses Playwright's native screenshot capabilities for simplicity.
+     * 
+     * @param scenario Cucumber scenario object containing test information
+     */
+    private void captureScreenshotOnFailure(Scenario scenario) {
+        try {
+            // Get the current page from TestContext
+            Page page = testContext.getPage();
+            
+            if (page == null) {
+                logger.warn("Cannot capture screenshot: Page object is null");
+                return;
+            }
+            
+            // Create screenshots directory
+            java.nio.file.Files.createDirectories(java.nio.file.Paths.get("target/screenshots/failed"));
+            
+            // Generate descriptive filename with test context and timestamp
+            String timestamp = java.time.LocalDateTime.now().format(
+                java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String testName = getTestName(scenario);
+            String scenarioName = scenario.getName().replaceAll("[^a-zA-Z0-9._-]", "_");
+            String filename = String.format("%s_%s_FAILED_%s.png", 
+                testName, scenarioName, timestamp);
+            Path screenshotPath = java.nio.file.Paths.get("target/screenshots/failed", filename);
+            
+            // Use Playwright's built-in screenshot method with best practices
+            page.screenshot(new Page.ScreenshotOptions()
+                    .setPath(screenshotPath)
+                    .setFullPage(true)
+                    .setTimeout(5000));  // 5 second timeout for screenshot
+            
+            logger.info("Screenshot captured for failed test: {}", screenshotPath);
+            
+            // Attach screenshot to Cucumber report
+            try {
+                byte[] screenshotBytes = java.nio.file.Files.readAllBytes(screenshotPath);
+                scenario.attach(screenshotBytes, "image/png", "Screenshot on Failure");
+                logger.info("Screenshot attached to Cucumber report");
+            } catch (Exception e) {
+                logger.warn("Failed to attach screenshot to Cucumber report: {}", e.getMessage());
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to capture screenshot on test failure: {}", e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Get test name from scenario for screenshot naming
+     * 
+     * @param scenario Cucumber scenario object
+     * @return Test name for screenshot filename
+     */
+    private String getTestName(Scenario scenario) {
+        // Try to get the test class name from the scenario
+        String scenarioId = scenario.getId();
+        
+        if (scenarioId != null && scenarioId.contains(";")) {
+            // Extract class name from scenario ID (format: package.Class;scenario)
+            String[] parts = scenarioId.split(";");
+            if (parts.length > 0) {
+                String className = parts[0];
+                // Extract just the class name without package
+                String[] classParts = className.split("\\.");
+                return classParts[classParts.length - 1];
+            }
+        }
+        
+        // Fallback to scenario name or default
+        return scenario.getName() != null ? scenario.getName() : "UnknownTest";
     }
 }
