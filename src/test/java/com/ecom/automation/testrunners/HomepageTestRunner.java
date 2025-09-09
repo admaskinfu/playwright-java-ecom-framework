@@ -19,7 +19,7 @@ import io.cucumber.testng.CucumberOptions;
     glue = "com.ecom.automation.stepdefinitions",  // Package with step definitions
     plugin = {
         "pretty",  // Pretty console output
-        "html:target/cucumber-reports/html",  // HTML report
+        "html:target/cucumber-reports/html.html",  // HTML report with proper extension
         "json:target/cucumber-reports/cucumber.json",  // JSON report for Maven plugin
         "junit:target/cucumber-reports/cucumber.xml"  // JUnit XML report
     },
