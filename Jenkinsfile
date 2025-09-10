@@ -13,7 +13,6 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timeout(time: 60, unit: 'MINUTES')
         timestamps()
-        ansiColor('xterm')
     }
     
     stages {
@@ -116,7 +115,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'main'
-                    startsWith(branch, 'feature/')
+                    expression { env.BRANCH_NAME.startsWith('feature/') }
                 }
             }
             steps {
@@ -145,7 +144,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'main'
-                    startsWith(branch, 'feature/')
+                    expression { env.BRANCH_NAME.startsWith('feature/') }
                 }
             }
             steps {
@@ -183,7 +182,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'main'
-                    startsWith(branch, 'feature/')
+                    expression { env.BRANCH_NAME.startsWith('feature/') }
                 }
             }
             parallel {
@@ -303,68 +302,22 @@ pipeline {
             }
             parallel {
                 stage('Frontend Regression Tests (Staging)') {
-                    parallel {
-                        stage('Chrome Tests') {
-                            steps {
-                                script {
-                                    echo "🧪 Running frontend regression tests on STAGING (Chrome)..."
-                                    
-                                    // Install Playwright browsers
-                                    sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"'
-                                    
-                                    // Run frontend regression tests
-                                    sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@regression and @frontend" -Denv=staging'
-                                    
-                                    echo "✅ Frontend regression tests (Chrome) completed!"
-                                }
-                            }
-                            post {
-                                always {
-                                    archiveArtifacts artifacts: 'target/cucumber-reports/**,target/surefire-reports/**', fingerprint: true
-                                }
-                            }
+                    steps {
+                        script {
+                            echo "🧪 Running frontend regression tests on STAGING..."
+                            
+                            // Install Playwright browsers for all browsers
+                            sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium firefox webkit"'
+                            
+                            // Run frontend regression tests
+                            sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@regression and @frontend" -Denv=staging'
+                            
+                            echo "✅ Frontend regression tests completed!"
                         }
-                        
-                        stage('Firefox Tests') {
-                            steps {
-                                script {
-                                    echo "🧪 Running frontend regression tests on STAGING (Firefox)..."
-                                    
-                                    // Install Playwright browsers
-                                    sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install firefox"'
-                                    
-                                    // Run frontend regression tests
-                                    sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@regression and @frontend" -Denv=staging'
-                                    
-                                    echo "✅ Frontend regression tests (Firefox) completed!"
-                                }
-                            }
-                            post {
-                                always {
-                                    archiveArtifacts artifacts: 'target/cucumber-reports/**,target/surefire-reports/**', fingerprint: true
-                                }
-                            }
-                        }
-                        
-                        stage('WebKit Tests') {
-                            steps {
-                                script {
-                                    echo "🧪 Running frontend regression tests on STAGING (WebKit)..."
-                                    
-                                    // Install Playwright browsers
-                                    sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install webkit"'
-                                    
-                                    // Run frontend regression tests
-                                    sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@regression and @frontend" -Denv=staging'
-                                    
-                                    echo "✅ Frontend regression tests (WebKit) completed!"
-                                }
-                            }
-                            post {
-                                always {
-                                    archiveArtifacts artifacts: 'target/cucumber-reports/**,target/surefire-reports/**', fingerprint: true
-                                }
-                            }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'target/cucumber-reports/**,target/surefire-reports/**', fingerprint: true
                         }
                     }
                 }
