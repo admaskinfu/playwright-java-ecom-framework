@@ -256,7 +256,8 @@ jobs:
         env:
           ENVIRONMENT: dev
         run: |
-          mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke and @frontend" -Denv=dev
+          mvn compile
+          mvn test -Dtest=HomepageTestRunner -Denv=dev
           
       - name: Upload frontend smoke test results
         uses: actions/upload-artifact@v4
@@ -300,7 +301,8 @@ jobs:
           API_CONSUMER_KEY: ${{ secrets.API_CONSUMER_KEY }}
           API_CONSUMER_SECRET: ${{ secrets.API_CONSUMER_SECRET }}
         run: |
-          mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@smoke and @api" -Denv=dev
+          mvn compile
+          mvn test -Dtest=SimpleCustomerApiTest -Denv=dev
           
       - name: Upload backend smoke test results
         uses: actions/upload-artifact@v4
@@ -415,7 +417,8 @@ jobs:
           ENVIRONMENT: staging
           BROWSER: ${{ matrix.browser }}
         run: |
-          mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@regression and @frontend" -Denv=staging
+          mvn compile
+          mvn test -Dtest=HomepageTestRunner -Denv=staging
           
       - name: Upload frontend regression test results
         uses: actions/upload-artifact@v4
@@ -459,7 +462,8 @@ jobs:
           API_CONSUMER_KEY: ${{ secrets.API_CONSUMER_KEY }}
           API_CONSUMER_SECRET: ${{ secrets.API_CONSUMER_SECRET }}
         run: |
-          mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@regression and @api" -Denv=staging
+          mvn compile
+          mvn test -Dtest=SimpleCustomerApiTest -Denv=staging
           
       - name: Upload backend regression test results
         uses: actions/upload-artifact@v4

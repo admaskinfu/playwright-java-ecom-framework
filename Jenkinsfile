@@ -173,6 +173,9 @@ pipeline {
                         script {
                             echo "🧪 Running frontend smoke tests on DEV..."
                             
+                            // Compile main classes first
+                            sh 'mvn compile'
+                            
                             // Install Playwright browsers
                             sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"'
                             
@@ -197,6 +200,9 @@ pipeline {
                     steps {
                         script {
                             echo "🧪 Running backend smoke tests on DEV..."
+                            
+                            // Compile main classes first
+                            sh 'mvn compile'
                             
                             // Run backend smoke tests using specific test class
                             sh 'mvn test -Dtest=SimpleCustomerApiTest -Denv=dev -Dmaven.test.failure.ignore=false'
@@ -289,6 +295,9 @@ pipeline {
                         script {
                             echo "🧪 Running frontend regression tests on STAGING..."
                             
+                            // Compile main classes first
+                            sh 'mvn compile'
+                            
                             // Install Playwright browsers for all browsers
                             sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium firefox webkit"'
                             
@@ -313,6 +322,9 @@ pipeline {
                     steps {
                         script {
                             echo "🧪 Running backend regression tests on STAGING..."
+                            
+                            // Compile main classes first
+                            sh 'mvn compile'
                             
                             // Run backend regression tests using specific test class
                             sh 'mvn test -Dtest=SimpleCustomerApiTest -Denv=staging -Dmaven.test.failure.ignore=false'
