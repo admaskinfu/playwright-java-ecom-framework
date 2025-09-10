@@ -28,7 +28,7 @@ public class HomePageLocators {
     public static final String HEADER_MENU = "nav, .main-navigation, .header-menu, .site-navigation";
     
     // Page structure locators
-    public static final String PRODUCT_GRID = ".woocommerce-loop-product__titlee";
+    public static final String PRODUCT_GRID = ".woocommerce-loop-product__title";
     
     // Private constructor to prevent instantiation
     private HomePageLocators() {
