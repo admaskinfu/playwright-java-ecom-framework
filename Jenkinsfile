@@ -111,13 +111,7 @@ pipeline {
         // =============================================================================
         
         stage('Deploy to Dev') {
-            when {
-                anyOf {
-                    branch 'develop'
-                    branch 'main'
-                    expression { env.BRANCH_NAME?.startsWith('feature/') }
-                }
-            }
+            // Run on all branches for now
             steps {
                 script {
                     echo "🚀 Simulating deployment to DEV environment..."
@@ -140,13 +134,7 @@ pipeline {
         }
         
         stage('Health Check Dev') {
-            when {
-                anyOf {
-                    branch 'develop'
-                    branch 'main'
-                    expression { env.BRANCH_NAME?.startsWith('feature/') }
-                }
-            }
+            // Run on all branches for now
             steps {
                 script {
                     echo "🏥 Running health check for DEV environment..."
@@ -178,13 +166,7 @@ pipeline {
         // =============================================================================
         
         stage('UAT on Dev') {
-            when {
-                anyOf {
-                    branch 'develop'
-                    branch 'main'
-                    expression { env.BRANCH_NAME?.startsWith('feature/') }
-                }
-            }
+            // Run on all branches for now
             parallel {
                 stage('Frontend Smoke Tests (Dev)') {
                     steps {
