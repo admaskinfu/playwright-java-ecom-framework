@@ -5,8 +5,8 @@ pipeline {
         JAVA_VERSION = '17'
         MAVEN_VERSION = '3.9.6'
         // Jenkins credentials should be configured in Jenkins UI
-        API_CONSUMER_KEY = credentials('api-consumer-key')
-        API_CONSUMER_SECRET = credentials('api-consumer-secret')
+        API_CONSUMER_KEY = credentials('API_CONSUMER_KEY')
+        API_CONSUMER_SECRET = credentials('API_CONSUMER_SECRET')
     }
     
     options {
