@@ -176,15 +176,19 @@ pipeline {
                             // Install Playwright browsers
                             sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"'
                             
-                            // Run frontend smoke tests
-                            sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke" -Denv=dev'
+                            // Run frontend smoke tests using TestNG suite
+                            sh 'mvn test -Dtest=Frontend Tests -Denv=dev -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Frontend smoke tests completed!"
                         }
                     }
                     post {
                         always {
+                            // Archive frontend-specific reports
                             archiveArtifacts artifacts: 'target/cucumber-reports/**,target/surefire-reports/**', fingerprint: true
+                            // Copy reports to frontend-specific directory
+                            sh 'mkdir -p target/reports/frontend && cp -r target/cucumber-reports/* target/reports/frontend/ 2>/dev/null || true'
+                            sh 'mkdir -p target/reports/frontend && cp -r target/surefire-reports/* target/reports/frontend/ 2>/dev/null || true'
                         }
                     }
                 }
@@ -194,15 +198,18 @@ pipeline {
                         script {
                             echo "🧪 Running backend smoke tests on DEV..."
                             
-                            // Run backend smoke tests
-                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@api" -Denv=dev'
+                            // Run backend smoke tests using TestNG suite
+                            sh 'mvn test -Dtest=API Tests -Denv=dev -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Backend smoke tests completed!"
                         }
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: 'target/surefire-reports/**,target/cucumber-reports/**', fingerprint: true
+                            // Archive backend-specific reports
+                            archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true
+                            // Copy reports to backend-specific directory
+                            sh 'mkdir -p target/reports/backend && cp -r target/surefire-reports/* target/reports/backend/ 2>/dev/null || true'
                         }
                     }
                 }
@@ -285,15 +292,19 @@ pipeline {
                             // Install Playwright browsers for all browsers
                             sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium firefox webkit"'
                             
-                            // Run frontend regression tests
-                            sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke" -Denv=staging'
+                            // Run frontend regression tests using TestNG suite
+                            sh 'mvn test -Dtest=Frontend Tests -Denv=staging -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Frontend regression tests completed!"
                         }
                     }
                     post {
                         always {
+                            // Archive frontend-specific reports
                             archiveArtifacts artifacts: 'target/cucumber-reports/**,target/surefire-reports/**', fingerprint: true
+                            // Copy reports to frontend-specific directory
+                            sh 'mkdir -p target/reports/frontend-staging && cp -r target/cucumber-reports/* target/reports/frontend-staging/ 2>/dev/null || true'
+                            sh 'mkdir -p target/reports/frontend-staging && cp -r target/surefire-reports/* target/reports/frontend-staging/ 2>/dev/null || true'
                         }
                     }
                 }
@@ -303,15 +314,18 @@ pipeline {
                         script {
                             echo "🧪 Running backend regression tests on STAGING..."
                             
-                            // Run backend regression tests
-                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@api" -Denv=staging'
+                            // Run backend regression tests using TestNG suite
+                            sh 'mvn test -Dtest=API Tests -Denv=staging -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Backend regression tests completed!"
                         }
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: 'target/surefire-reports/**,target/cucumber-reports/**', fingerprint: true
+                            // Archive backend-specific reports
+                            archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true
+                            // Copy reports to backend-specific directory
+                            sh 'mkdir -p target/reports/backend-staging && cp -r target/surefire-reports/* target/reports/backend-staging/ 2>/dev/null || true'
                         }
                     }
                 }
@@ -395,6 +409,9 @@ pipeline {
                 echo "  - Deployment: ✅"
                 echo "🔗 Build: ${env.BUILD_URL}"
                 echo "⏰ Completed: ${new Date()}"
+                
+                // Archive all reports in organized structure
+                archiveArtifacts artifacts: 'target/reports/**', fingerprint: true
             }
         }
         success {

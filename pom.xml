@@ -225,8 +225,8 @@
                     <!-- Parallel Test Execution for faster UAT test runs -->
                     <parallel>methods</parallel>
                     <threadCount>2</threadCount>
-                    <!-- Continue running tests even if one fails -->
-                    <testFailureIgnore>true</testFailureIgnore>
+                    <!-- Fail build when tests fail -->
+                    <testFailureIgnore>false</testFailureIgnore>
                     <!-- Pass Cucumber filter tags to test execution -->
                     <systemPropertyVariables>
                         <cucumber.filter.tags>${cucumber.filter.tags}</cucumber.filter.tags>
