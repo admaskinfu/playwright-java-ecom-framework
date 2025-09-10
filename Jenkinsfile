@@ -176,8 +176,8 @@ pipeline {
                             // Install Playwright browsers
                             sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"'
                             
-                            // Run frontend smoke tests using TestNG suite
-                            sh 'mvn test -Dtest=Frontend Tests -Denv=dev -Dmaven.test.failure.ignore=false'
+                            // Run frontend smoke tests using specific test class
+                            sh 'mvn test -Dtest=HomepageTestRunner -Denv=dev -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Frontend smoke tests completed!"
                         }
@@ -198,8 +198,8 @@ pipeline {
                         script {
                             echo "🧪 Running backend smoke tests on DEV..."
                             
-                            // Run backend smoke tests using TestNG suite
-                            sh 'mvn test -Dtest=API Tests -Denv=dev -Dmaven.test.failure.ignore=false'
+                            // Run backend smoke tests using specific test class
+                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Denv=dev -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Backend smoke tests completed!"
                         }
@@ -292,8 +292,8 @@ pipeline {
                             // Install Playwright browsers for all browsers
                             sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium firefox webkit"'
                             
-                            // Run frontend regression tests using TestNG suite
-                            sh 'mvn test -Dtest=Frontend Tests -Denv=staging -Dmaven.test.failure.ignore=false'
+                            // Run frontend regression tests using specific test class
+                            sh 'mvn test -Dtest=HomepageTestRunner -Denv=staging -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Frontend regression tests completed!"
                         }
@@ -314,8 +314,8 @@ pipeline {
                         script {
                             echo "🧪 Running backend regression tests on STAGING..."
                             
-                            // Run backend regression tests using TestNG suite
-                            sh 'mvn test -Dtest=API Tests -Denv=staging -Dmaven.test.failure.ignore=false'
+                            // Run backend regression tests using specific test class
+                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Denv=staging -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Backend regression tests completed!"
                         }
