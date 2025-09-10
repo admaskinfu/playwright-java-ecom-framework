@@ -201,11 +201,8 @@ pipeline {
                         script {
                             echo "🧪 Running backend smoke tests on DEV..."
                             
-                            // Compile main classes first
-                            sh 'mvn compile'
-                            
-                            // Run backend smoke tests using specific test class
-                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Denv=dev -Dmaven.test.failure.ignore=false'
+                            // Compile and run backend smoke tests in one command
+                            sh 'mvn compile test -Dtest=SimpleCustomerApiTest -Denv=dev -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Backend smoke tests completed!"
                         }
@@ -323,11 +320,8 @@ pipeline {
                         script {
                             echo "🧪 Running backend regression tests on STAGING..."
                             
-                            // Compile main classes first
-                            sh 'mvn compile'
-                            
-                            // Run backend regression tests using specific test class
-                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Denv=staging -Dmaven.test.failure.ignore=false'
+                            // Compile and run backend regression tests in one command
+                            sh 'mvn compile test -Dtest=SimpleCustomerApiTest -Denv=staging -Dmaven.test.failure.ignore=false'
                             
                             echo "✅ Backend regression tests completed!"
                         }
