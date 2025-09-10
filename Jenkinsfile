@@ -177,7 +177,7 @@ pipeline {
                             sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"'
                             
                             // Run frontend smoke tests
-                            sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke and @frontend" -Denv=dev'
+                            sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke" -Denv=dev'
                             
                             echo "✅ Frontend smoke tests completed!"
                         }
@@ -195,7 +195,7 @@ pipeline {
                             echo "🧪 Running backend smoke tests on DEV..."
                             
                             // Run backend smoke tests
-                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@smoke and @api" -Denv=dev'
+                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@api" -Denv=dev'
                             
                             echo "✅ Backend smoke tests completed!"
                         }
@@ -215,9 +215,7 @@ pipeline {
         
         stage('Deploy to Staging') {
             when {
-                anyOf {
-                    branch 'main'
-                }
+                branch 'main'
             }
             steps {
                 script {
@@ -242,9 +240,7 @@ pipeline {
         
         stage('Health Check Staging') {
             when {
-                anyOf {
-                    branch 'main'
-                }
+                branch 'main'
             }
             steps {
                 script {
@@ -278,9 +274,7 @@ pipeline {
         
         stage('UAT on Staging') {
             when {
-                anyOf {
-                    branch 'main'
-                }
+                branch 'main'
             }
             parallel {
                 stage('Frontend Regression Tests (Staging)') {
@@ -292,7 +286,7 @@ pipeline {
                             sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium firefox webkit"'
                             
                             // Run frontend regression tests
-                            sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@regression and @frontend" -Denv=staging'
+                            sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke" -Denv=staging'
                             
                             echo "✅ Frontend regression tests completed!"
                         }
@@ -310,7 +304,7 @@ pipeline {
                             echo "🧪 Running backend regression tests on STAGING..."
                             
                             // Run backend regression tests
-                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@regression and @api" -Denv=staging'
+                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@api" -Denv=staging'
                             
                             echo "✅ Backend regression tests completed!"
                         }
@@ -330,9 +324,7 @@ pipeline {
         
         stage('Deploy to Prod') {
             when {
-                anyOf {
-                    branch 'main'
-                }
+                branch 'main'
             }
             steps {
                 script {
@@ -361,9 +353,7 @@ pipeline {
         
         stage('Post-Deployment Checks') {
             when {
-                anyOf {
-                    branch 'main'
-                }
+                branch 'main'
             }
             steps {
                 script {
