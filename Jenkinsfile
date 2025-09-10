@@ -17,24 +17,6 @@ pipeline {
     
     stages {
         // =============================================================================
-        // STAGE 0: ENVIRONMENT SETUP
-        // =============================================================================
-        
-        stage('Environment Setup') {
-            steps {
-                script {
-                    echo "🔧 Setting up Jenkins agent environment..."
-                    
-                    // Make setup script executable and run it
-                    sh 'chmod +x setup-jenkins-agent.sh'
-                    sh './setup-jenkins-agent.sh'
-                    
-                    echo "✅ Environment setup completed!"
-                }
-            }
-        }
-        
-        // =============================================================================
         // STAGE 1: BUILD & QUALITY GATES
         // =============================================================================
         
