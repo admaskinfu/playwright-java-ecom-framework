@@ -5,10 +5,49 @@ This document provides instructions for setting up the Jenkins CI/CD pipeline fo
 ## Prerequisites
 
 - Jenkins server with Pipeline plugin installed
-- Java 17 installed on Jenkins agents
-- Maven 3.9.6+ installed on Jenkins agents
+- **Java 17 installed on Jenkins agents** (manually installed)
+- **Maven 3.8.7+ installed on Jenkins agents** (manually installed)
 - Git plugin for Jenkins
 - Credentials plugin for Jenkins
+- Maven Integration plugin (optional but recommended)
+
+## Manual Dependencies Installation
+
+### Install Java 17 and Maven on Jenkins Agent
+
+**If using Docker container:**
+```bash
+# Exec into the Jenkins container as root
+docker exec -it <container_name> bash
+
+# Install Java 17
+apt-get update
+apt-get install -y openjdk-17-jdk
+
+# Install Maven
+apt-get install -y maven
+
+# Verify installations
+java -version
+mvn --version
+
+# Exit container
+exit
+```
+
+**If using Jenkins agent directly:**
+```bash
+# For Ubuntu/Debian
+sudo apt update
+sudo apt install -y openjdk-17-jdk maven
+
+# For CentOS/RHEL
+sudo yum install -y java-17-openjdk-devel maven
+
+# Verify installations
+java -version
+mvn --version
+```
 
 ## Pipeline Configuration
 
@@ -60,10 +99,10 @@ The Jenkinsfile includes:
 ## Pipeline Stages
 
 ### Stage 1: Build & Quality Gates
-- **Build**: Framework compilation
+- **Build**: Framework compilation (simulated)
 - **Security Scan**: OWASP dependency check (simulated)
 - **Lint Main App**: Main application linting (simulated)
-- **Lint Automation Code**: Real Maven validation and SpotBugs
+- **Lint Automation Code**: Real Maven validation, compilation, and SpotBugs
 - **Framework Validation**: Framework structure validation (simulated)
 
 ### Stage 2: Deploy to Dev
@@ -71,16 +110,16 @@ The Jenkinsfile includes:
 - **Health Check Dev**: Real health check of demo site
 
 ### Stage 3: UAT on Dev
-- **Frontend Smoke Tests**: Real Playwright tests
-- **Backend Smoke Tests**: Real API tests
+- **Frontend Smoke Tests**: Real Playwright tests with Maven execution
+- **Backend Smoke Tests**: Real API tests with Maven execution
 
 ### Stage 4: Deploy to Staging
 - **Deploy to Staging**: Simulated deployment (main branch only)
 - **Health Check Staging**: Real health check
 
 ### Stage 5: UAT on Staging
-- **Frontend Regression Tests**: Multi-browser testing (Chrome, Firefox, WebKit)
-- **Backend Regression Tests**: API regression tests
+- **Frontend Regression Tests**: Multi-browser testing (Chrome, Firefox, WebKit) with Maven
+- **Backend Regression Tests**: API regression tests with Maven
 
 ### Stage 6: Deploy to Prod
 - **Deploy to Prod**: Simulated deployment (main branch only)
@@ -143,20 +182,27 @@ The pipeline includes:
 ### Common Issues
 
 1. **Java Version Mismatch**
-   - Ensure Jenkins agents have Java 17 installed
+   - Ensure Jenkins agents have Java 17 manually installed
    - Check `JAVA_HOME` environment variable
+   - Run `java -version` to verify installation
 
-2. **Maven Dependencies**
-   - Verify Maven is installed and accessible
-   - Check Maven settings.xml configuration
+2. **Maven Not Found**
+   - Ensure Maven is manually installed on Jenkins agent
+   - Run `mvn --version` to verify installation
+   - Check Maven is in PATH environment variable
 
 3. **Playwright Browsers**
-   - Browsers are installed automatically during test execution
+   - Browsers are installed automatically during test execution via Maven
    - Ensure sufficient disk space for browser binaries
+   - Check Maven can download and install browsers
 
 4. **API Credentials**
    - Verify credentials are properly configured in Jenkins
-   - Check credential IDs match the Jenkinsfile
+   - Check credential IDs match the Jenkinsfile (`API_CONSUMER_KEY`, `API_CONSUMER_SECRET`)
+
+5. **Docker Container Issues**
+   - If using Docker, ensure Java and Maven are installed in the container
+   - Container changes may be lost on restart - consider using a custom image
 
 ### Logs Location
 
