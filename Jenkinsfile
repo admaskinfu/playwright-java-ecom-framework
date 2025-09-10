@@ -77,27 +77,14 @@ pipeline {
                         script {
                             echo "🔍 Linting automation code..."
                             
-                            // Check if Maven is available
-                            def mavenAvailable = sh(
-                                script: 'which mvn || echo "maven_not_found"',
-                                returnStdout: true
-                            ).trim()
+                            // Validate Maven configuration
+                            sh 'mvn validate'
                             
-                            if (mavenAvailable == "maven_not_found") {
-                                echo "⚠️ Maven not found on Jenkins agent - simulating linting"
-                                echo "🎭 SIMULATION: Maven validation would run here"
-                                echo "🎭 SIMULATION: Code compilation would run here"
-                                echo "🎭 SIMULATION: SpotBugs check would run here"
-                            } else {
-                                // Validate Maven configuration
-                                sh 'mvn validate'
-                                
-                                // Compile test code
-                                sh 'mvn test-compile'
-                                
-                                // Check code style (SpotBugs)
-                                sh 'mvn spotbugs:check || true'
-                            }
+                            // Compile test code
+                            sh 'mvn test-compile'
+                            
+                            // Check code style (SpotBugs)
+                            sh 'mvn spotbugs:check || true'
                             
                             echo "✅ Automation code linting completed successfully!"
                         }
@@ -128,7 +115,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'main'
-                    expression { env.BRANCH_NAME.startsWith('feature/') }
+                    expression { env.BRANCH_NAME?.startsWith('feature/') }
                 }
             }
             steps {
@@ -157,7 +144,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'main'
-                    expression { env.BRANCH_NAME.startsWith('feature/') }
+                    expression { env.BRANCH_NAME?.startsWith('feature/') }
                 }
             }
             steps {
@@ -195,7 +182,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'main'
-                    expression { env.BRANCH_NAME.startsWith('feature/') }
+                    expression { env.BRANCH_NAME?.startsWith('feature/') }
                 }
             }
             parallel {
@@ -204,23 +191,11 @@ pipeline {
                         script {
                             echo "🧪 Running frontend smoke tests on DEV..."
                             
-                            // Check if Maven is available
-                            def mavenAvailable = sh(
-                                script: 'which mvn || echo "maven_not_found"',
-                                returnStdout: true
-                            ).trim()
+                            // Install Playwright browsers
+                            sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"'
                             
-                            if (mavenAvailable == "maven_not_found") {
-                                echo "⚠️ Maven not found on Jenkins agent - simulating frontend tests"
-                                echo "🎭 SIMULATION: Playwright browser installation would run here"
-                                echo "🎭 SIMULATION: Frontend smoke tests would run here"
-                            } else {
-                                // Install Playwright browsers
-                                sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium"'
-                                
-                                // Run frontend smoke tests
-                                sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke and @frontend" -Denv=dev'
-                            }
+                            // Run frontend smoke tests
+                            sh 'mvn test -Dtest=HomepageTestRunner -Dcucumber.filter.tags="@smoke and @frontend" -Denv=dev'
                             
                             echo "✅ Frontend smoke tests completed!"
                         }
@@ -237,19 +212,8 @@ pipeline {
                         script {
                             echo "🧪 Running backend smoke tests on DEV..."
                             
-                            // Check if Maven is available
-                            def mavenAvailable = sh(
-                                script: 'which mvn || echo "maven_not_found"',
-                                returnStdout: true
-                            ).trim()
-                            
-                            if (mavenAvailable == "maven_not_found") {
-                                echo "⚠️ Maven not found on Jenkins agent - simulating backend tests"
-                                echo "🎭 SIMULATION: Backend smoke tests would run here"
-                            } else {
-                                // Run backend smoke tests
-                                sh 'mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@smoke and @api" -Denv=dev'
-                            }
+                            // Run backend smoke tests
+                            sh 'mvn test -Dtest=SimpleCustomerApiTest -Dcucumber.filter.tags="@smoke and @api" -Denv=dev'
                             
                             echo "✅ Backend smoke tests completed!"
                         }
